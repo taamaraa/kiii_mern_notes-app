@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: notes-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: notesdb
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./server
+    container_name: notes-backend
+    restart: always
+    environment:
+      MONGO_URI: mongodb://root:example@mongo:27017/notesdb?authSource=admin
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    container_name: notes-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
